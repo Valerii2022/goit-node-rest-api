@@ -1,7 +1,7 @@
 import {
   addContact,
   getContactById,
-  listContacts,
+  getContacts,
   removeContact,
   updateContactById,
 } from "../services/contactsServices.js";
@@ -10,7 +10,9 @@ import { HttpError } from "../helpers/HttpError.js";
 import { ctrlWrapper } from "../decorators/ctrlWrapper.js";
 
 const getAllContacts = async (_, res) => {
-  const result = await listContacts();
+  const result = await getContacts({
+    fields: "-createdAt -updatedAt",
+  });
   res.json(result);
 };
 
