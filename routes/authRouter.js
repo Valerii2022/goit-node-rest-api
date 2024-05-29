@@ -2,8 +2,8 @@ import express from "express";
 import { isEmptyBody } from "../middlewares/isEmptyBody.js";
 import { validateBody } from "../decorators/validateBody.js";
 import { authSigninSchema, authSignupSchema } from "../schemas/authSchemas.js";
-import isValidId from "../middlewares/isValidId.js";
 import authControllers from "../controllers/authControllers.js";
+import authenticate from "../middlewares/authenticate.js";
 
 const authRouter = express.Router();
 
@@ -20,5 +20,9 @@ authRouter.post(
   validateBody(authSigninSchema),
   authControllers.signin
 );
+
+authRouter.get("/current", authenticate, authControllers.getCurrent);
+
+authRouter.post("/signout", authenticate, authControllers.signout);
 
 export default authRouter;
