@@ -1,3 +1,5 @@
+import fs from "fs/promises";
+import path from "path";
 import {
   addContact,
   getContact,
@@ -9,6 +11,9 @@ import {
 
 import { HttpError } from "../helpers/HttpError.js";
 import { ctrlWrapper } from "../decorators/ctrlWrapper.js";
+import cloudinary from "../helpers/cloudinary.js";
+
+const postersPath = path.resolve("public", "posters");
 
 const getAllContacts = async (req, res) => {
   const { _id: owner } = req.user;
@@ -47,8 +52,24 @@ const deleteContact = async (req, res) => {
 
 const createContact = async (req, res) => {
   const { _id: owner } = req.user;
-  const result = await addContact({ ...req.body, owner });
-  res.status(201).json(result);
+  try {
+    // save to cloudinary
+    const { url: poster } = await cloudinary.uploader.upload(req.file.path, {
+      folder: "posters",
+    });
+    await fs.unlink(req.file.path);
+    // save to public folder
+    // ---------------------------
+    // const { path: oldPath, filename } = req.file;
+    // const newPath = path.join(postersPath, filename);
+    // await fs.rename(oldPath, newPath);
+    // const poster = path.join("posters", filename);
+    const result = await addContact({ ...req.body, poster, owner });
+    res.status(201).json(result);
+  } catch (error) {
+    await fs.unlink(req.file.path);
+    throw HttpError(400, error.message);
+  }
 };
 
 const updateContact = async (req, res) => {

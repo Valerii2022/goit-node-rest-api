@@ -30,6 +30,7 @@ const contactSchema = new Schema(
       match: birthYearRegexp,
       required: true,
     },
+    poster: { type: String, required: true },
     owner: {
       type: Schema.Types.ObjectId,
       ref: "user",
