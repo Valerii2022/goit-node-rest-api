@@ -57,7 +57,6 @@ const createContact = async (req, res) => {
     const { url: poster } = await cloudinary.uploader.upload(req.file.path, {
       folder: "posters",
     });
-    await fs.unlink(req.file.path);
     // save to public folder
     // ---------------------------
     // const { path: oldPath, filename } = req.file;
@@ -67,8 +66,9 @@ const createContact = async (req, res) => {
     const result = await addContact({ ...req.body, poster, owner });
     res.status(201).json(result);
   } catch (error) {
-    await fs.unlink(req.file.path);
     throw HttpError(400, error.message);
+  } finally {
+    await fs.unlink(req.file.path);
   }
 };
 
