@@ -13,7 +13,7 @@ import { HttpError } from "../helpers/HttpError.js";
 import { ctrlWrapper } from "../decorators/ctrlWrapper.js";
 import cloudinary from "../helpers/cloudinary.js";
 
-const postersPath = path.resolve("public", "posters");
+// const postersPath = path.resolve("public", "posters");
 
 const getAllContacts = async (req, res) => {
   const { _id: owner } = req.user;

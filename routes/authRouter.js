@@ -4,11 +4,13 @@ import { validateBody } from "../decorators/validateBody.js";
 import { authSigninSchema, authSignupSchema } from "../schemas/authSchemas.js";
 import authControllers from "../controllers/authControllers.js";
 import authenticate from "../middlewares/authenticate.js";
+import upload from "../middlewares/upload.js";
 
 const authRouter = express.Router();
 
 authRouter.post(
   "/signup",
+  upload.single("avatar"),
   isEmptyBody,
   validateBody(authSignupSchema),
   authControllers.signup

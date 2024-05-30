@@ -1,8 +1,13 @@
 import * as authServices from "../services/authServices.js";
+import fs from "fs/promises";
+import path from "path";
 import { HttpError } from "../helpers/HttpError.js";
 import { ctrlWrapper } from "../decorators/ctrlWrapper.js";
 import { compareHash } from "../helpers/compareHash.js";
 import { createToken } from "../helpers/jwt.js";
+import cloudinary from "../helpers/cloudinary.js";
+
+// const avatarsPath = path.resolve("public", "avatars");
 
 const signup = async (req, res) => {
   const { email } = req.body;
@@ -10,12 +15,25 @@ const signup = async (req, res) => {
   if (user) {
     throw HttpError(409, "Email already in use");
   }
-  const newUser = await authServices.saveUser(req.body);
+  try {
+    const { url: avatar } = await cloudinary.uploader.upload(req.file.path, {
+      folder: "avatars",
+    });
+    // const { path: oldPath, filename } = req.file;
+    // const newPath = path.join(avatarsPath, filename);
+    // await fs.rename(oldPath, newPath);
+    // const avatar = path.join("avatars", filename);
+    const newUser = await authServices.saveUser({ ...req.body, avatar });
 
-  res.status(201).json({
-    name: newUser.name,
-    email: newUser.email,
-  });
+    res.status(201).json({
+      name: newUser.name,
+      email: newUser.email,
+    });
+  } catch (error) {
+    throw HttpError(400, error.message);
+  } finally {
+    await fs.unlink(req.file.path);
+  }
 };
 
 const signin = async (req, res) => {
