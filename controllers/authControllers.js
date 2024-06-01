@@ -1,6 +1,7 @@
 import * as authServices from "../services/authServices.js";
 import fs from "fs/promises";
-import path from "path";
+import gravatar from "gravatar";
+// import path from "path";
 import { HttpError } from "../helpers/HttpError.js";
 import { ctrlWrapper } from "../decorators/ctrlWrapper.js";
 import { compareHash } from "../helpers/compareHash.js";
@@ -16,9 +17,18 @@ const signup = async (req, res) => {
     throw HttpError(409, "Email already in use");
   }
   try {
-    const { url: avatar } = await cloudinary.uploader.upload(req.file.path, {
-      folder: "avatars",
-    });
+    let avatar;
+    if (req.file) {
+      const { url } = await cloudinary.uploader.upload(req.file.path, {
+        folder: "avatars",
+      });
+      avatar = url;
+    } else {
+      avatar = gravatar.url(email, {
+        protocol: "https",
+        s: "100",
+      });
+    }
     // const { path: oldPath, filename } = req.file;
     // const newPath = path.join(avatarsPath, filename);
     // await fs.rename(oldPath, newPath);
@@ -54,7 +64,7 @@ const signin = async (req, res) => {
   const token = createToken(payload);
   await authServices.updateUser({ _id: id }, { token });
 
-  res.json({ token });
+  res.json({ token, name: user.name, email: user.email });
 };
 
 const getCurrent = (req, res) => {
