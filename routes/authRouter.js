@@ -5,12 +5,14 @@ import { authSigninSchema, authSignupSchema } from "../schemas/authSchemas.js";
 import authControllers from "../controllers/authControllers.js";
 import authenticate from "../middlewares/authenticate.js";
 import upload from "../middlewares/upload.js";
+import resizeImage from "../middlewares/resizeImage.js";
 
 const authRouter = express.Router();
 
 authRouter.post(
   "/signup",
   upload.single("avatar"),
+  resizeImage,
   isEmptyBody,
   validateBody(authSignupSchema),
   authControllers.signup
@@ -26,5 +28,13 @@ authRouter.post(
 authRouter.get("/current", authenticate, authControllers.getCurrent);
 
 authRouter.post("/signout", authenticate, authControllers.signout);
+
+authRouter.patch(
+  "/users/avatars",
+  upload.single("avatar"),
+  resizeImage,
+  authenticate,
+  authControllers.updateAvatar
+);
 
 export default authRouter;

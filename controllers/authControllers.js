@@ -1,7 +1,7 @@
 import * as authServices from "../services/authServices.js";
 import fs from "fs/promises";
-import gravatar from "gravatar";
 // import path from "path";
+import gravatar from "gravatar";
 import { HttpError } from "../helpers/HttpError.js";
 import { ctrlWrapper } from "../decorators/ctrlWrapper.js";
 import { compareHash } from "../helpers/compareHash.js";
@@ -14,6 +14,9 @@ const signup = async (req, res) => {
   const { email } = req.body;
   const user = await authServices.findUser({ email });
   if (user) {
+    if (req.file) {
+      await fs.unlink(req.file.path);
+    }
     throw HttpError(409, "Email already in use");
   }
   try {
@@ -85,9 +88,35 @@ const signout = async (req, res) => {
   });
 };
 
+const updateAvatar = async (req, res) => {
+  const { _id, email } = req.user;
+  try {
+    let avatar;
+    if (req.file) {
+      const { url } = await cloudinary.uploader.upload(req.file.path, {
+        folder: "avatars",
+      });
+      avatar = url;
+    } else {
+      avatar = gravatar.url(email, {
+        protocol: "https",
+        s: "100",
+      });
+    }
+    await authServices.updateUser({ _id }, { avatar });
+
+    res.json({ avatar });
+  } catch (error) {
+    throw HttpError(400, "error.message");
+  } finally {
+    await fs.unlink(req.file.path);
+  }
+};
+
 export default {
   signup: ctrlWrapper(signup),
   signin: ctrlWrapper(signin),
   getCurrent: ctrlWrapper(getCurrent),
   signout: ctrlWrapper(signout),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };
