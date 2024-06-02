@@ -5,12 +5,12 @@ import app from "../app.js";
 
 import { findUser, deleteAllUsers } from "../services/authServices.js";
 
-const { DB_TEST_HOST } = process.env;
+const { DB_HOST } = process.env;
 
 describe("test /api/auth/signup", () => {
   let server = null;
   beforeAll(async () => {
-    await mongoose.connect(DB_TEST_HOST);
+    await mongoose.connect(DB_HOST);
     server = app.listen(3001);
   });
 
