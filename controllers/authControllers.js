@@ -91,7 +91,7 @@ const resendVerify = async (req, res) => {
   const verifyEmail = {
     to: email,
     subject: "Verify email",
-    html: `<a target="_blank" href="http://localhost:3000/api/auth/verify/${user.verificationCode}">Click verify email</a>`,
+    html: `<a target="_blank" href="https://goit-node-rest-api-yq9r.onrender.com/api/auth/verify/${user.verificationCode}">Click verify email</a>`,
   };
 
   await sendEmail(verifyEmail);
